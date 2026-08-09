@@ -188,6 +188,67 @@
     text-align: center;
     transition: color 0.8s ease;
   }
+
+  .controls {
+    margin-top: 22px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .sound-toggle {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--ui-font);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
+    background: color-mix(in srgb, var(--ink) 8%, transparent);
+    border: none;
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.3s ease, color 0.8s ease;
+  }
+  .sound-toggle:hover { background: color-mix(in srgb, var(--ink) 14%, transparent); }
+  .sound-toggle svg { width: 14px; height: 14px; }
+  .hint {
+    font-size: 11px;
+    color: var(--ink-soft);
+    transition: color 0.8s ease;
+  }
+
+  .enter-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(20,16,12,0.42);
+    backdrop-filter: blur(2px);
+    cursor: pointer;
+    transition: opacity 0.5s ease;
+  }
+  .enter-overlay.hidden { opacity: 0; pointer-events: none; }
+  .enter-card {
+    background: var(--paper);
+    color: var(--ink);
+    padding: 26px 30px;
+    border-radius: 14px;
+    text-align: center;
+    max-width: 280px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .enter-card .line1 {
+    font-family: var(--content-font);
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
+  .enter-card .line2 {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
 </style>
 </head>
 <body>
@@ -206,8 +267,26 @@
     <div class="field" id="field"></div>
   </div>
 
+  <div class="controls">
+    <button class="sound-toggle" id="soundToggle" aria-pressed="true">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 2c-1.1 0-2 .9-2 2v.29C7.16 5.17 5 7.82 5 11v5l-1.7 1.71A1 1 0 0 0 4 19h16a1 1 0 0 0 .7-1.71L19 16v-5c0-3.18-2.16-5.83-5-6.71V4c0-1.1-.9-2-2-2zm0 20a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22z"/>
+        <line id="soundSlash" x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none"/>
+      </svg>
+      <span id="soundLabel">Sound on</span>
+    </button>
+    <span class="hint">move over the garden · ← → to change scenes</span>
+  </div>
+
   <div class="footer">Susurrus — a project by Anwar Creative Studio</div>
   <div class="debug" id="debug"></div>
+
+  <div class="enter-overlay" id="enterOverlay">
+    <div class="enter-card">
+      <div class="line1">Click to enter</div>
+      <div class="line2">this unlocks sound — after that, just listen and move over the garden</div>
+    </div>
+  </div>
 
 <script>
   const SCENES = [
@@ -220,6 +299,7 @@
       paper: '#b4aaa3', ink: '#2c2824', inkSoft: '#6b625a',
       fieldColor: '#c9c1b8', fieldPattern: 'repeating-linear-gradient(95deg, rgba(255,255,255,0.5) 0px, rgba(255,255,255,0.5) 1px, transparent 1px, transparent 4px)',
       fieldSize: '5px 5px', fieldOpacity: 0.55,
+      sound: { filterType: 'bandpass', freq: 3200, q: 1.3, gain: 0.05, drip: true, dripRate: 2600, dripJitter: 900, dripPitch: 1500 },
     },
     {
       key: 'iran', label: 'ایران · Iran',
@@ -230,6 +310,7 @@
       paper: '#e3c39f', ink: '#3a2c1c', inkSoft: '#7a6650',
       fieldColor: '#d8b78e', fieldPattern: 'repeating-linear-gradient(0deg, rgba(90,120,120,0.25) 0px, rgba(90,120,120,0.25) 1px, transparent 1px, transparent 7px)',
       fieldSize: '100% 7px', fieldOpacity: 0.4,
+      sound: { filterType: 'lowpass', freq: 900, q: 0.7, gain: 0.07, drip: false },
     },
     {
       key: 'mughal-india', label: 'भारत · Mughal India',
@@ -240,6 +321,7 @@
       paper: '#f5e4cc', ink: '#3a3020', inkSoft: '#7d715a',
       fieldColor: '#e9d5b3', fieldPattern: 'radial-gradient(rgba(255,255,255,0.6) 1px, transparent 1px)',
       fieldSize: '6px 6px', fieldOpacity: 0.5,
+      sound: { filterType: 'bandpass', freq: 1500, q: 1, gain: 0.05, drip: true, dripRate: 4000, dripJitter: 1200, dripPitch: 900 },
     },
     {
       key: 'england', label: 'England',
@@ -250,6 +332,7 @@
       paper: '#9fa17d', ink: '#2a2c1f', inkSoft: '#5f624a',
       fieldColor: '#8b8e69', fieldPattern: 'radial-gradient(rgba(255,255,255,0.35) 1px, transparent 1.4px)',
       fieldSize: '5px 5px', fieldOpacity: 0.6,
+      sound: { filterType: 'bandpass', freq: 2100, q: 0.6, gain: 0.055, drip: false },
     },
     {
       key: 'mexico', label: 'México',
@@ -260,6 +343,7 @@
       paper: '#d16841', ink: '#3a1f14', inkSoft: '#7d5643',
       fieldColor: '#bd5a37', fieldPattern: 'radial-gradient(rgba(255,255,255,0.3) 1px, transparent 1.4px)',
       fieldSize: '5px 5px', fieldOpacity: 0.55,
+      sound: { filterType: 'bandpass', freq: 1800, q: 1, gain: 0.05, drip: true, dripRate: 1800, dripJitter: 700, dripPitch: 1700 },
     },
     {
       key: 'bali', label: 'Bali',
@@ -270,8 +354,103 @@
       paper: '#585a2f', ink: '#eee9db', inkSoft: '#c3bfa9',
       fieldColor: '#4b4d28', fieldPattern: 'radial-gradient(rgba(255,255,255,0.18) 1px, transparent 1.4px)',
       fieldSize: '5px 5px', fieldOpacity: 0.6,
+      sound: { filterType: 'lowpass', freq: 1300, q: 0.6, gain: 0.06, drip: true, dripRate: 3500, dripJitter: 1400, dripPitch: 700 },
     },
   ];
+
+  class AudioGarden {
+    constructor() {
+      this.ctx = null;
+      this.master = null;
+      this.filter = null;
+      this.noiseGain = null;
+      this.activity = 0;
+      this.baseGain = 0;
+      this.dripTimer = null;
+      this.profile = null;
+    }
+    start() {
+      if (this.ctx) return;
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new Ctx();
+
+      this.master = this.ctx.createGain();
+      this.master.gain.value = 1;
+      this.master.connect(this.ctx.destination);
+
+      const bufferSize = this.ctx.sampleRate * 2;
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+      noise.loop = true;
+
+      this.filter = this.ctx.createBiquadFilter();
+      this.filter.type = 'bandpass';
+      this.filter.frequency.value = 2000;
+      this.filter.Q.value = 1;
+
+      this.noiseGain = this.ctx.createGain();
+      this.noiseGain.gain.value = 0;
+
+      noise.connect(this.filter).connect(this.noiseGain).connect(this.master);
+      noise.start();
+
+      setInterval(() => {
+        if (this.noiseGain && this.profile) {
+          this.activity *= 0.965;
+          const g = this.baseGain * (0.55 + 0.9 * this.activity);
+          this.noiseGain.gain.setTargetAtTime(g, this.ctx.currentTime, 0.15);
+        }
+      }, 100);
+    }
+    setMuted(muted) {
+      if (!this.ctx) return;
+      this.master.gain.setTargetAtTime(muted ? 0 : 1, this.ctx.currentTime, 0.2);
+    }
+    setProfile(profile) {
+      this.profile = profile;
+      clearTimeout(this.dripTimer);
+      if (!this.ctx) return;
+      const t = this.ctx.currentTime;
+      this.filter.type = profile.filterType;
+      this.filter.frequency.setTargetAtTime(profile.freq, t, 0.7);
+      this.filter.Q.setTargetAtTime(profile.q, t, 0.7);
+      this.baseGain = profile.gain;
+      if (profile.drip) this.scheduleDrip();
+    }
+    bump(intensity) {
+      this.activity = Math.min(1, this.activity + intensity);
+    }
+    scheduleDrip() {
+      const p = this.profile;
+      if (!p || !p.drip) return;
+      const delay = p.dripRate + (Math.random() - 0.5) * p.dripJitter;
+      this.dripTimer = setTimeout(() => {
+        this.playDrip(p.dripPitch);
+        this.scheduleDrip();
+      }, delay);
+    }
+    playDrip(pitch) {
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(pitch * 1.8, t);
+      osc.frequency.exponentialRampToValueAtTime(pitch, t + 0.06);
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.16, t + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+      const filt = this.ctx.createBiquadFilter();
+      filt.type = 'lowpass';
+      filt.frequency.value = pitch * 2.5;
+      osc.connect(filt).connect(g).connect(this.master);
+      osc.start(t);
+      osc.stop(t + 0.55);
+    }
+  }
+  const audio = new AudioGarden();
 
   const root = document.documentElement;
   const eyebrowEl = document.getElementById('eyebrow');
@@ -335,6 +514,7 @@
     eyebrowEl.textContent = scene.label;
     titleEl.textContent = scene.title;
     subtitleEl.textContent = scene.subtitle;
+    audio.setProfile(scene.sound);
 
     imgEl.style.clipPath = 'inset(0)';
     imgEl.style.marginBottom = '0';
@@ -372,6 +552,29 @@
     if (e.key === 'ArrowLeft') goTo((sceneIndex - 1 + SCENES.length) % SCENES.length);
     if (e.key === 'ArrowRight') goTo((sceneIndex + 1) % SCENES.length);
   });
+
+  const enterOverlay = document.getElementById('enterOverlay');
+  const soundToggle = document.getElementById('soundToggle');
+  const soundLabel = document.getElementById('soundLabel');
+  const soundSlash = document.getElementById('soundSlash');
+  let soundOn = true;
+
+  enterOverlay.addEventListener('click', () => {
+    audio.start();
+    audio.setProfile(SCENES[sceneIndex].sound);
+    enterOverlay.classList.add('hidden');
+  }, { once: true });
+
+  soundToggle.addEventListener('click', () => {
+    soundOn = !soundOn;
+    audio.setMuted(!soundOn);
+    soundLabel.textContent = soundOn ? 'Sound on' : 'Sound off';
+    soundSlash.style.display = soundOn ? 'none' : 'block';
+    soundToggle.setAttribute('aria-pressed', String(soundOn));
+  });
+
+  stageEl.addEventListener('pointermove', () => audio.bump(0.06));
+  stageEl.addEventListener('touchmove', () => audio.bump(0.06));
 
   renderScene(SCENES[sceneIndex]);
 </script>
