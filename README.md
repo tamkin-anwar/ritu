@@ -12,15 +12,16 @@ Six garden scenes from around the world, each staged as an isolated photograph a
 - A seam-closing step that scans the rendered photo for where its content actually ends and clips the padding away, so the photo sits flush against the field beneath it with no visible gap
 - A language switcher with a matching ink and paper palette per scene, including a dark palette for the Bali scene
 - Full keyboard support: left and right arrows move between gardens
-- An ambient sound bed synthesized live per garden with the Web Audio API: filtered noise tuned to the scene's material (sand, water, leaves), with occasional drips where a garden has a fountain or pond
-- Moving over a garden gently raises the sound, the way a breath of wind would
+- An ambient sound bed synthesized live per garden with the Web Audio API, built from a different mechanism per material: a static hiss for sand, a slow-swept filter for flowing water, a resonant tone with a slap echo for a marble courtyard, an amplitude-modulated flutter for leaves in a breeze, and a deep slow-swept hum for a damp jungle pond
+- A ground strip beneath each photo you can touch: sand scatters and settles, gravel shifts heavily, grass blades bend away from the cursor, moss pushes and springs back slowly, and marble and terracotta don't move at all, they just catch the light
+- Touching the ground plays a short percussive tick tuned to that garden's material, on top of the ambient bed
 
 ## Tech stack
 
 - Plain HTML, CSS, and vanilla JavaScript, no framework or build step
 - Python and Pillow for the offline image prep pipeline
-- Canvas 2D in the browser for the seam-closing and background color measurement
-- Web Audio API for the synthesized ambient sound, no audio files
+- Canvas 2D in the browser for the seam-closing and the interactive ground particles
+- Web Audio API for the synthesized ambient sound and touch sounds, no audio files
 
 ## Running locally
 
