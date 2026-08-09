@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#b4aaa3">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%BF%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600&display=optional" rel="stylesheet">
+<title>Susurrus — by Anwar Creative Studio</title>
+<style>
+  :root{
+    --paper: #b4aaa3;
+    --ink: #2c2824;
+    --ink-soft: #6b625a;
+    --content-font: "Fraunces", "Iowan Old Style", Georgia, serif;
+    --ui-font: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 20px 72px;
+    color: var(--ink);
+    font-family: var(--ui-font);
+    background: var(--paper);
+    transition: background-color 0.8s ease, color 0.8s ease;
+    position: relative;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    mix-blend-mode: multiply;
+    background-image: radial-gradient(rgba(0,0,0,0.03) 0.6px, transparent 0.6px);
+    background-size: 3px 3px;
+    z-index: 0;
+  }
+  body > * { position: relative; z-index: 1; }
+
+  .brand {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 6px;
+    transition: color 0.8s ease;
+  }
+  .brand .by {
+    color: var(--ink-soft);
+    letter-spacing: 0.01em;
+    text-transform: none;
+    font-weight: 500;
+    font-size: 10.5px;
+  }
+  .eyebrow {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 22px 0 8px;
+    transition: color 0.8s ease;
+  }
+  h1 {
+    font-family: var(--content-font);
+    font-weight: 500;
+    font-size: clamp(24px, 3.8vw, 34px);
+    margin: 0 0 8px;
+    text-align: center;
+    max-width: 560px;
+    transition: color 0.8s ease;
+  }
+  .sub {
+    color: var(--ink-soft);
+    font-size: 14px;
+    text-align: center;
+    max-width: 460px;
+    margin: 0 0 30px;
+    font-style: italic;
+    line-height: 1.55;
+    transition: color 0.8s ease;
+  }
+
+  .switcher {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 34px;
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 4px;
+  }
+  .switcher::-webkit-scrollbar { display: none; }
+  .tab {
+    font-family: var(--ui-font);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+  .tab.active {
+    background: color-mix(in srgb, var(--ink) 10%, transparent);
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .stage {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.4s cubic-bezier(0.22,1,0.36,1), transform 0.45s cubic-bezier(0.22,1,0.36,1);
+  }
+  .stage.transitioning { opacity: 0; transform: translateY(8px); }
+
+  .photo-wrap {
+    position: relative;
+    z-index: 2;
+  }
+  .photo {
+    width: 100%;
+    display: block;
+    filter: saturate(1.08) contrast(1.04) brightness(1.01);
+    -webkit-mask-image: radial-gradient(ellipse var(--mx, 62%) var(--my, 62%) at var(--cx, 50%) var(--cy, 50%), black 55%, transparent 90%);
+    mask-image: radial-gradient(ellipse var(--mx, 62%) var(--my, 62%) at var(--cx, 50%) var(--cy, 50%), black 55%, transparent 90%);
+  }
+  .seam-shadow {
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    height: 54px;
+    bottom: 0;
+    background: radial-gradient(ellipse 55% 100% at 50% 0%, rgba(0,0,0,0.14), transparent 75%);
+    filter: blur(6px);
+    z-index: 1;
+    pointer-events: none;
+  }
+  .field {
+    position: relative;
+    z-index: 1;
+    width: 90%;
+    margin: 0 auto;
+    height: 110px;
+    border-radius: 3px;
+    overflow: hidden;
+    transition: background-color 0.8s ease;
+  }
+  .field::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: var(--field-pattern);
+    background-size: var(--field-size, 6px 6px);
+    opacity: var(--field-opacity, 0.5);
+  }
+
+  .debug {
+    margin-top: 34px;
+    font-family: ui-monospace, monospace;
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    background: rgba(255,255,255,0.25);
+    padding: 8px 12px;
+    border-radius: 6px;
+    max-width: 900px;
+    opacity: 0.7;
+  }
+  .footer {
+    margin-top: 44px;
+    font-size: 11px;
+    color: var(--ink-soft);
+    text-align: center;
+    transition: color 0.8s ease;
+  }
+</style>
+</head>
+<body>
+  <div class="brand">Susurrus <span class="by">— by Anwar Creative Studio</span></div>
+  <div class="eyebrow" id="eyebrow">日本 · Japan</div>
+  <h1 id="title">A circle raked in sand</h1>
+  <p class="sub" id="subtitle">Water finds the stone, and the garden listens.</p>
+
+  <div class="switcher" id="switcher"></div>
+
+  <div class="stage" id="stage">
+    <div class="photo-wrap">
+      <img class="photo" id="photo" alt="">
+    </div>
+    <div class="seam-shadow"></div>
+    <div class="field" id="field"></div>
+  </div>
+
+  <div class="footer">Susurrus — a project by Anwar Creative Studio</div>
+  <div class="debug" id="debug"></div>
+
+<script>
+  const SCENES = [
+    {
+      key: 'japan', label: '日本 · Japan',
+      title: 'A circle raked in sand',
+      subtitle: 'Water finds the stone, and the garden listens.',
+      src: 'processed-images/japan.png',
+      cx: 34.0, cy: 65.3,
+      paper: '#b4aaa3', ink: '#2c2824', inkSoft: '#6b625a',
+      fieldColor: '#c9c1b8', fieldPattern: 'repeating-linear-gradient(95deg, rgba(255,255,255,0.5) 0px, rgba(255,255,255,0.5) 1px, transparent 1px, transparent 4px)',
+      fieldSize: '5px 5px', fieldOpacity: 0.55,
+    },
+    {
+      key: 'iran', label: 'ایران · Iran',
+      title: 'A channel drawn straight to the horizon',
+      subtitle: 'The chahar bagh: four quarters, one line of water between them.',
+      src: 'processed-images/iran.png',
+      cx: 39.2, cy: 66.1,
+      paper: '#e3c39f', ink: '#3a2c1c', inkSoft: '#7a6650',
+      fieldColor: '#d8b78e', fieldPattern: 'repeating-linear-gradient(0deg, rgba(90,120,120,0.25) 0px, rgba(90,120,120,0.25) 1px, transparent 1px, transparent 7px)',
+      fieldSize: '100% 7px', fieldOpacity: 0.4,
+    },
+    {
+      key: 'mughal-india', label: 'भारत · Mughal India',
+      title: 'An arch that mirrors itself in still water',
+      subtitle: 'Marble carved thin enough for flowers to show through.',
+      src: 'processed-images/mughal-india.png',
+      cx: 50.0, cy: 50.0,
+      paper: '#f5e4cc', ink: '#3a3020', inkSoft: '#7d715a',
+      fieldColor: '#e9d5b3', fieldPattern: 'radial-gradient(rgba(255,255,255,0.6) 1px, transparent 1px)',
+      fieldSize: '6px 6px', fieldOpacity: 0.5,
+    },
+    {
+      key: 'england', label: 'England',
+      title: 'Roses climbing a fence gone soft with age',
+      subtitle: 'Foxglove, rose, and ivy, tangled the way no one planned.',
+      src: 'processed-images/england.png',
+      cx: 46.4, cy: 42.9,
+      paper: '#9fa17d', ink: '#2a2c1f', inkSoft: '#5f624a',
+      fieldColor: '#8b8e69', fieldPattern: 'radial-gradient(rgba(255,255,255,0.35) 1px, transparent 1.4px)',
+      fieldSize: '5px 5px', fieldOpacity: 0.6,
+    },
+    {
+      key: 'mexico', label: 'México',
+      title: 'Talavera tile, and bougainvillea on both sides',
+      subtitle: 'Water finds the shell-carved spout, and keeps its own time.',
+      src: 'processed-images/mexico.png',
+      cx: 50.0, cy: 50.0,
+      paper: '#d16841', ink: '#3a1f14', inkSoft: '#7d5643',
+      fieldColor: '#bd5a37', fieldPattern: 'radial-gradient(rgba(255,255,255,0.3) 1px, transparent 1.4px)',
+      fieldSize: '5px 5px', fieldOpacity: 0.55,
+    },
+    {
+      key: 'bali', label: 'Bali',
+      title: 'A split gate, standing open for no one',
+      subtitle: 'Candi bentar: the mountain cut in two so the sacred can pass between.',
+      src: 'processed-images/bali.png',
+      cx: 43.1, cy: 61.8,
+      paper: '#585a2f', ink: '#eee9db', inkSoft: '#c3bfa9',
+      fieldColor: '#4b4d28', fieldPattern: 'radial-gradient(rgba(255,255,255,0.18) 1px, transparent 1.4px)',
+      fieldSize: '5px 5px', fieldOpacity: 0.6,
+    },
+  ];
+
+  const root = document.documentElement;
+  const eyebrowEl = document.getElementById('eyebrow');
+  const titleEl = document.getElementById('title');
+  const subtitleEl = document.getElementById('subtitle');
+  const stageEl = document.getElementById('stage');
+  const imgEl = document.getElementById('photo');
+  const fieldEl = document.getElementById('field');
+  const debugEl = document.getElementById('debug');
+  const switcherEl = document.getElementById('switcher');
+
+  let sceneIndex = 0;
+
+  function closeGap(el) {
+    const canvas = document.createElement('canvas');
+    canvas.width = el.naturalWidth;
+    canvas.height = el.naturalHeight;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(el, 0, 0);
+    const bg = ctx.getImageData(3, 3, 1, 1).data;
+    const isBg = (px) => Math.abs(px[0]-bg[0])<12 && Math.abs(px[1]-bg[1])<12 && Math.abs(px[2]-bg[2])<12;
+    let contentBottom = canvas.height;
+    for (let y = canvas.height - 1; y >= 0; y -= 2) {
+      const row = ctx.getImageData(0, y, canvas.width, 1).data;
+      let has = false;
+      for (let x = 0; x < canvas.width; x += 6) {
+        const px = [row[x*4], row[x*4+1], row[x*4+2]];
+        if (!isBg(px)) { has = true; break; }
+      }
+      if (has) { contentBottom = y; break; }
+    }
+    const bufferRatio = 0.01;
+    const keepRatio = Math.min(1, (contentBottom / canvas.height) + bufferRatio);
+    const displayedHeight = el.getBoundingClientRect().height;
+    const clipPx = displayedHeight * (1 - keepRatio);
+    el.style.clipPath = `inset(0 0 ${clipPx.toFixed(1)}px 0)`;
+    el.style.marginBottom = `-${clipPx.toFixed(1)}px`;
+    fieldEl.style.marginTop = `-${clipPx.toFixed(1)}px`;
+
+    const sampleCanvas = document.createElement('canvas');
+    sampleCanvas.width = canvas.width;
+    sampleCanvas.height = canvas.height;
+    const sctx = sampleCanvas.getContext('2d');
+    sctx.filter = getComputedStyle(el).filter;
+    sctx.drawImage(el, 0, 0);
+    const filtered = sctx.getImageData(3, 3, 1, 1).data;
+    const hex = '#' + [filtered[0], filtered[1], filtered[2]].map(v => v.toString(16).padStart(2,'0')).join('');
+
+    debugEl.textContent = `[${SCENES[sceneIndex].key}] contentBottom=${contentBottom}px keepRatio=${keepRatio.toFixed(4)} clipPx=${clipPx.toFixed(1)} sourceBg=rgb(${bg[0]},${bg[1]},${bg[2]}) measuredPaper=${hex} (using authored ${SCENES[sceneIndex].paper})`;
+  }
+
+  function renderScene(scene) {
+    root.style.setProperty('--paper', scene.paper);
+    root.style.setProperty('--ink', scene.ink);
+    root.style.setProperty('--ink-soft', scene.inkSoft);
+    fieldEl.style.setProperty('--field-pattern', scene.fieldPattern);
+    fieldEl.style.setProperty('--field-size', scene.fieldSize);
+    fieldEl.style.setProperty('--field-opacity', scene.fieldOpacity);
+    fieldEl.style.backgroundColor = scene.fieldColor;
+
+    eyebrowEl.textContent = scene.label;
+    titleEl.textContent = scene.title;
+    subtitleEl.textContent = scene.subtitle;
+
+    imgEl.style.clipPath = 'inset(0)';
+    imgEl.style.marginBottom = '0';
+    fieldEl.style.marginTop = '0';
+    imgEl.style.setProperty('--cx', scene.cx + '%');
+    imgEl.style.setProperty('--cy', scene.cy + '%');
+
+    const finish = () => requestAnimationFrame(() => requestAnimationFrame(() => closeGap(imgEl)));
+    imgEl.onload = finish;
+    imgEl.src = scene.src;
+    if (imgEl.complete && imgEl.src.endsWith(scene.src)) finish();
+
+    [...switcherEl.children].forEach((btn, i) => btn.classList.toggle('active', i === sceneIndex));
+  }
+
+  function goTo(i) {
+    if (i === sceneIndex) return;
+    stageEl.classList.add('transitioning');
+    setTimeout(() => {
+      sceneIndex = i;
+      renderScene(SCENES[sceneIndex]);
+      stageEl.classList.remove('transitioning');
+    }, 220);
+  }
+
+  SCENES.forEach((scene, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'tab';
+    btn.textContent = scene.label;
+    btn.addEventListener('click', () => goTo(i));
+    switcherEl.appendChild(btn);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') goTo((sceneIndex - 1 + SCENES.length) % SCENES.length);
+    if (e.key === 'ArrowRight') goTo((sceneIndex + 1) % SCENES.length);
+  });
+
+  renderScene(SCENES[sceneIndex]);
+</script>
+</body>
+</html>
