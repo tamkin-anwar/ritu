@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Susurrus photo-integration pipeline.
+Ritu photo-integration pipeline.
 
 Usage: python3 prepare_image.py <name> --anchor-x <0..1> --anchor-y <0..1> [--pad 180]
 

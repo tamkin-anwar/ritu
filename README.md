@@ -1,8 +1,8 @@
-# Susurrus
+# Ritu
 
 Six garden scenes from around the world, each staged as an isolated photograph and blended into the page so the crop, the color, and the shadow read as one continuous object instead of a pasted-in image.
 
-[Live site →](https://tamkin-anwar.github.io/susurrus/)
+[Live site →](https://tamkin-anwar.github.io/ritu/)
 
 ## What's here
 

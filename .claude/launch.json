@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "susurrus-static",
+      "name": "ritu-static",
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "8743"],
       "port": 8743
