@@ -355,8 +355,7 @@
     },
   ];
 
-  const NIGHT_PAPER = '#0e1220', NIGHT_INK = '#f1ece2', NIGHT_INK_SOFT = '#b9b2a4';
-  const GOLD_PAPER  = '#c98f4a';
+  const NIGHT_INK = '#f1ece2', NIGHT_INK_SOFT = '#b9b2a4';
 
   function hexToRgb(hex) {
     const n = parseInt(hex.slice(1), 16);
@@ -462,14 +461,47 @@
     el.style.marginBottom = `-${clipPx.toFixed(1)}px`;
   }
 
-  // Applies the scene's live weather/light state (if loaded) to the page: paper and
-  // ink colors shift toward night or golden-hour tones, the photo itself dims and
-  // desaturates for night, and rain/snow/fog layers switch on when relevant. If the
-  // weather fetch hasn't resolved yet, this quietly does nothing and the page shows
-  // the scene's plain baseline "day" look instead of guessing.
+  // Renders the exact same transform the photo goes through (filter, then the
+  // weather tint blended on top) onto a single pixel of the scene's own paper
+  // color, and reads back what that pixel actually becomes. This is the only way
+  // to keep the page background matching the photo's edge: guessing a "night
+  // color" independently of the photo's own filter/tint math is what caused the
+  // page and the photo to visibly mismatch (a photo-on-a-different-background
+  // look) in every state except plain daylight.
+  const colorCanvas = document.createElement('canvas');
+  colorCanvas.width = 1; colorCanvas.height = 1;
+  const colorCtx = colorCanvas.getContext('2d', { willReadFrequently: true });
+  function renderedPaper(paperHex, brightness, saturation, tintColor, tintOpacity, tintBlend) {
+    colorCtx.clearRect(0, 0, 1, 1);
+    colorCtx.filter = `saturate(${(1.08 * saturation).toFixed(4)}) contrast(1.04) brightness(${(1.01 * brightness).toFixed(4)})`;
+    colorCtx.fillStyle = paperHex;
+    colorCtx.fillRect(0, 0, 1, 1);
+    colorCtx.filter = 'none';
+    if (tintOpacity > 0) {
+      colorCtx.globalAlpha = tintOpacity;
+      colorCtx.globalCompositeOperation = tintBlend === 'normal' ? 'source-over' : tintBlend;
+      colorCtx.fillStyle = tintColor;
+      colorCtx.fillRect(0, 0, 1, 1);
+      colorCtx.globalAlpha = 1;
+      colorCtx.globalCompositeOperation = 'source-over';
+    }
+    const d = colorCtx.getImageData(0, 0, 1, 1).data;
+    return '#' + [d[0], d[1], d[2]].map(v => v.toString(16).padStart(2, '0')).join('');
+  }
+
+  // Applies the scene's live weather/light state (if loaded) to the page: the
+  // photo dims/desaturates and takes a color tint for night or golden-hour light,
+  // the page background is re-measured to match that exact transform (see
+  // renderedPaper above), ink shifts for readability, and rain/snow/fog layers
+  // switch on when relevant. If the weather fetch hasn't resolved yet, this
+  // quietly does nothing and the page shows the scene's plain baseline "day"
+  // look instead of guessing.
   function applyLiveVisuals(scene) {
     const live = scene.live;
     if (!live) {
+      root.style.setProperty('--paper', scene.paper);
+      root.style.setProperty('--ink', scene.ink);
+      root.style.setProperty('--ink-soft', scene.inkSoft);
       root.style.setProperty('--b', 1);
       root.style.setProperty('--s', 1);
       tintEl.style.setProperty('--tint-opacity', 0);
@@ -483,24 +515,23 @@
     const phase = lightPhase(now, live.sunriseMs, live.sunsetMs);
     const cloudFactor = Math.min(1, live.cloudCover / 100);
 
-    let paper = scene.paper, ink = scene.ink, inkSoft = scene.inkSoft;
+    let ink = scene.ink, inkSoft = scene.inkSoft;
     let brightness = 1, saturation = 1 - cloudFactor * 0.18;
     let tintColor = 'transparent', tintOpacity = 0, tintBlend = 'normal';
 
     if (phase === 'night') {
       const depth = 0.78;
-      paper = lerpHex(scene.paper, NIGHT_PAPER, depth);
       ink = lerpHex(scene.ink, NIGHT_INK, depth);
       inkSoft = lerpHex(scene.inkSoft, NIGHT_INK_SOFT, depth);
       brightness = 0.7; saturation *= 0.68;
       tintColor = '#141a30'; tintOpacity = 0.32; tintBlend = 'multiply';
     } else if (phase === 'dawn' || phase === 'dusk') {
-      paper = lerpHex(scene.paper, GOLD_PAPER, 0.22);
       brightness = 1.04; saturation *= 1.1;
       tintColor = phase === 'dawn' ? '#ffb168' : '#ff8f6b';
       tintOpacity = 0.16; tintBlend = 'soft-light';
     }
 
+    const paper = renderedPaper(scene.paper, brightness, saturation, tintColor, tintOpacity, tintBlend);
     root.style.setProperty('--paper', paper);
     root.style.setProperty('--ink', ink);
     root.style.setProperty('--ink-soft', inkSoft);
