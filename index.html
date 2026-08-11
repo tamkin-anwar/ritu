@@ -180,8 +180,21 @@
   .photo-wrap {
     position: relative;
     z-index: 2;
-    -webkit-mask-image: radial-gradient(ellipse 62% 62% at var(--cx) var(--cy), black 55%, transparent 90%);
-    mask-image: radial-gradient(ellipse 62% 62% at var(--cx) var(--cy), black 55%, transparent 90%);
+    /* Two independent jobs, layered: the radial gives the object a soft organic
+       vignette around its own off-center visual anchor, sized generously so it
+       never has to fully close (and so never cuts real content that sits far
+       from the anchor). The two linear "frame" layers do the job the radial
+       can't: they guarantee zero opacity at all four box edges no matter where
+       the anchor sits, since a single symmetric ellipse centered off-center
+       mathematically cannot reach transparent on the near edge without also
+       cutting content on the far edge. mask-composite intersects all three, so
+       a pixel is only visible where every layer agrees it should be. */
+    --mask-shape: radial-gradient(ellipse 88% 88% at var(--cx) var(--cy), black 50%, transparent 97%);
+    --mask-frame-x: linear-gradient(to right, transparent 0%, black 17%, black 83%, transparent 100%);
+    --mask-frame-y: linear-gradient(to bottom, transparent 0%, black 17%, black 83%, transparent 100%);
+    -webkit-mask-image: var(--mask-shape);
+    mask-image: var(--mask-shape), var(--mask-frame-x), var(--mask-frame-y);
+    mask-composite: intersect, intersect;
   }
   .photo {
     width: 100%;
@@ -304,7 +317,7 @@
       title: 'A circle raked in sand',
       subtitle: 'Water finds the stone, and the garden listens.',
       src: 'processed-images/japan.png',
-      cx: 34.0, cy: 65.3,
+      cx: 36.2, cy: 62.4,
       paper: '#b4aaa3', ink: '#2c2824', inkSoft: '#6b625a',
       lat: 35.0116, lon: 135.7681, tz: 'Asia/Tokyo',
     },
@@ -313,7 +326,7 @@
       title: 'A channel drawn straight to the horizon',
       subtitle: 'The chahar bagh: four quarters, one line of water between them.',
       src: 'processed-images/iran.png',
-      cx: 39.2, cy: 66.1,
+      cx: 41.3, cy: 63.7,
       paper: '#e3c39f', ink: '#3a2c1c', inkSoft: '#7a6650',
       lat: 32.6546, lon: 51.6680, tz: 'Asia/Tehran',
     },
@@ -331,7 +344,7 @@
       title: 'Roses climbing a fence gone soft with age',
       subtitle: 'Foxglove, rose, and ivy, tangled the way no one planned.',
       src: 'processed-images/england.png',
-      cx: 46.4, cy: 42.9,
+      cx: 47.3, cy: 44.9,
       paper: '#9fa17d', ink: '#2a2c1f', inkSoft: '#5f624a',
       lat: 51.8330, lon: -1.8433, tz: 'Europe/London',
     },
@@ -349,7 +362,7 @@
       title: 'A split gate, standing open for no one',
       subtitle: 'Candi bentar: the mountain cut in two so the sacred can pass between.',
       src: 'processed-images/bali.png',
-      cx: 43.1, cy: 61.8,
+      cx: 44.0, cy: 60.0,
       paper: '#585a2f', ink: '#eee9db', inkSoft: '#c3bfa9',
       lat: -8.5069, lon: 115.2625, tz: 'Asia/Makassar',
     },
