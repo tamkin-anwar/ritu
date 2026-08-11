@@ -1,27 +1,26 @@
 # Ritu
 
-Six garden scenes from around the world, each staged as an isolated photograph and blended into the page so the crop, the color, and the shadow read as one continuous object instead of a pasted-in image.
+Six gardens from around the world, each showing its real current weather and light. Kyoto at midday, Isfahan at dawn, a Cotswolds garden gone dark at 3am: the page reflects what's actually happening in each place right now, not a loop.
 
 [Live site →](https://tamkin-anwar.github.io/ritu/)
 
 ## What's here
 
-- Six gardens: a Japanese zen garden, a Persian chahar bagh water channel, a Mughal Indian marble archway, an English cottage garden, a Talavera fountain from Mexico, and a Balinese candi bentar gate
+- Six gardens: a Japanese zen garden (Kyoto), a Persian chahar bagh water channel (Isfahan), a Mughal Indian marble archway (Agra), an English cottage garden (the Cotswolds), a Talavera fountain (Puebla), and a Balinese candi bentar gate (Ubud)
+- Live weather and sun position for each garden's real city, pulled from Open-Meteo with no API key required
+- A day/dawn/dusk/night lighting model: the photo's brightness and saturation, the page's paper and ink colors, and a soft color-tint overlay all shift with the actual time of day and season at that location, not a canned animation
+- Rain, snow, and fog layers that switch on when a garden's real weather calls for them, masked to the photo's own silhouette so they only fall where the object is
+- A language switcher where every tab shows that city's real local clock, ticking, plus a small icon for its current conditions, so the six times reveal themselves before you even pick a garden
 - A photo pipeline that finds each photo's real content bounds against its background, crops tight, and pads it back out for a soft radial mask to feather into
 - A page background color measured from the actual rendered pixel, after the CSS filter and mask are applied, not guessed from the source file
-- A seam-closing step that scans the rendered photo for where its content actually ends and clips the padding away, so the photo sits flush against the field beneath it with no visible gap
-- A language switcher with a matching ink and paper palette per scene, including a dark palette for the Bali scene
 - Full keyboard support: left and right arrows move between gardens
-- An ambient sound bed synthesized live per garden with the Web Audio API, built from a different mechanism per material: a static hiss for sand, a slow-swept filter for flowing water, a resonant tone with a slap echo for a marble courtyard, an amplitude-modulated flutter for leaves in a breeze, and a deep slow-swept hum for a damp jungle pond
-- A ground strip beneath each photo you can touch: sand scatters and settles, gravel shifts heavily, grass blades bend away from the cursor, moss pushes and springs back slowly, and marble and terracotta don't move at all, they just catch the light
-- Touching the ground plays a short percussive tick tuned to that garden's material, on top of the ambient bed
 
 ## Tech stack
 
 - Plain HTML, CSS, and vanilla JavaScript, no framework or build step
+- [Open-Meteo](https://open-meteo.com/) for live temperature, cloud cover, precipitation, and sunrise/sunset, fetched client-side with no key or backend
 - Python and Pillow for the offline image prep pipeline
-- Canvas 2D in the browser for the seam-closing and the interactive ground particles
-- Web Audio API for the synthesized ambient sound and touch sounds, no audio files
+- Canvas 2D in the browser for the seam-closing measurement
 
 ## Running locally
 
@@ -29,7 +28,7 @@ Six garden scenes from around the world, each staged as an isolated photograph a
 python3 -m http.server 8743
 ```
 
-Open `http://localhost:8743`.
+Open `http://localhost:8743`. Weather requires network access; if the fetch fails or is offline, the page falls back to each garden's plain daytime look and the clocks keep running regardless, since they don't depend on the weather fetch.
 
 To reprocess a source image:
 
